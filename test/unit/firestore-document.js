@@ -158,6 +158,21 @@ describe('MockFirestoreDocument', function () {
 
       db.flush();
     });
+
+    it('creates a new doc with value of FieldValue.increment()', function (done) {
+      var createDoc = db.doc('createDoc');
+
+      createDoc.create({titles: Firestore.FieldValue.increment(10)});
+
+      createDoc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.get('titles')).to.equal(10);
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
   });
 
   describe('#set', function () {
@@ -209,6 +224,23 @@ describe('MockFirestoreDocument', function () {
       doc.get().then(function(snap) {
         expect(snap.exists).to.equal(true);
         expect(snap.get('ref')).to.have.property('ref');
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('overrides existing data when using FieldValue.increment()', function (done) {
+      doc.set({
+        titles: 10
+      });
+      doc.set({
+        titles: Firestore.FieldValue.increment(10)
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.data()).to.deep.equal({titles: 10});
         done();
       }).catch(done);
 
@@ -413,6 +445,37 @@ describe('MockFirestoreDocument', function () {
       db.flush();
     });
 
+    it('adds to existing data when using FieldValue.increment()', function (done) {
+      doc.set({
+        titles: 10
+      });
+      doc.update({
+        titles: Firestore.FieldValue.increment(10)
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.data()).to.deep.equal({titles: 20});
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
+    it('sets when no existing data exists when using FieldValue.increment()', function (done) {
+      doc.set({
+        titles: Firestore.FieldValue.increment(10)
+      });
+
+      doc.get().then(function (snap) {
+        expect(snap.exists).to.equal(true);
+        expect(snap.data()).to.deep.equal({titles: 10});
+        done();
+      }).catch(done);
+
+      db.flush();
+    });
+
     it('does not merge nested properties recursively by default', function (done) {
       doc.set({
         nested: {
@@ -577,7 +640,7 @@ describe('MockFirestoreDocument', function () {
         if (!first) {
           expect(snap.get('newTitle')).to.equal('A new title');
           done();
-        }  
+        }
 
         first = false;
       });
@@ -587,7 +650,7 @@ describe('MockFirestoreDocument', function () {
 
     it('does not call observer when no changes occur', function (done) {
       var first = true;
-      
+
       doc.onSnapshot(function(snap) {
         if (!first) throw new Error('Observer called unexpectedly!');
         first = false;

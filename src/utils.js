@@ -155,14 +155,21 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
         obj[s] = new Date(serverTime);
       } else if (value instanceof Timestamp) {
         obj[s] = value.toDate();
-      }
-      if (FieldValue.arrayRemove().isEqual(value)) {
+      } else if (FieldValue.arrayRemove().isEqual(value)) {
         const replacement = Array.isArray(value.arg) ? value.arg : [value.arg];
         obj[s] = doArrayRemove(replacement, s);
-      }
-      if (FieldValue.arrayUnion().isEqual(value)) {
+      } else if (FieldValue.arrayUnion().isEqual(value)) {
         const replacement = Array.isArray(value.arg) ? value.arg : [value.arg];
         obj[s] = _.union(current[s], replacement);
+      } else if (FieldValue.increment().isEqual(value)) {
+        if (current[s] == null) {
+          // no existing data
+          obj[s] = value.arg;
+          console.log(obj[s], value);
+        } else {
+          // add to existing data
+          obj[s] = current[s] + value.arg;
+        }
       }
     }
   }
