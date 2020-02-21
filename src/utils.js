@@ -162,7 +162,7 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
         const replacement = Array.isArray(value.arg) ? value.arg : [value.arg];
         obj[s] = _.union(current[s], replacement);
       } else if (FieldValue.increment().isEqual(value)) {
-        if (current[s] == null) {
+        if (current == null || current[s] == null) {
           // no existing data
           obj[s] = value.arg;
         } else {
