@@ -165,7 +165,6 @@ exports.removeEmptyFirestoreProperties = function removeEmptyFirestoreProperties
         if (current[s] == null) {
           // no existing data
           obj[s] = value.arg;
-          console.log(obj[s], value);
         } else {
           // add to existing data
           obj[s] = current[s] + value.arg;
